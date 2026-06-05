@@ -1,0 +1,11 @@
+[Desktop Entry]
+Type=Application
+Name=iCloud Notes
+Name[tr]=iCloud Notlar
+Comment=Access iCloud Notes on Linux
+Comment[tr]=Linux'ta iCloud Notlar'a erişin
+Exec=icloud-linux notes Notes
+Icon=io.github.TaylanTatli.iCloud-Linux.Notes
+Categories=Network;Utility;
+Keywords=iCloud;Notes;Apple;
+StartupWMClass=iCloud Notes

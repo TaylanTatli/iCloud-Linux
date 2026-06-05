@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<component type="desktop-application">
+  <id>io.github.TaylanTatli.iCloud-Linux</id>
+
+  <name>iCloud Linux</name>
+  <summary>Access Apple iCloud services on Linux</summary>
+  <icon type="stock">io.github.TaylanTatli.iCloud-Linux</icon>
+
+  <metadata_license>CC0-1.0</metadata_license>
+  <project_license>GPL-3.0-only</project_license>
+
+  <description>
+    <p>
+      iCloud Linux provides native desktop access to Apple iCloud services.
+      Each service opens in its own window using the system WebKit engine,
+      giving you a clean, integrated experience on the Linux desktop.
+    </p>
+    <p>Available services:</p>
+    <ul>
+      <li>Mail</li>
+      <li>Contacts</li>
+      <li>Calendar</li>
+      <li>Photos</li>
+      <li>iCloud Drive</li>
+      <li>Notes</li>
+      <li>Reminders</li>
+      <li>Pages</li>
+      <li>Numbers</li>
+      <li>Keynote</li>
+      <li>Find My</li>
+    </ul>
+    <p>
+      The TLD (top-level domain) can be customised by placing your preferred
+      domain suffix (e.g. <code>.com.cn</code>) in the file
+      <code>~/.local/share/icloud-linux/tld</code>.
+    </p>
+  </description>
+
+  <url type="homepage">https://github.com/TaylanTatli/iCloud-Linux</url>
+  <url type="bugtracker">https://github.com/TaylanTatli/iCloud-Linux/issues</url>
+  <url type="vcs-browser">https://github.com/TaylanTatli/iCloud-Linux</url>
+
+  <launchable type="desktop-id">io.github.TaylanTatli.iCloud-Linux.Mail.desktop</launchable>
+  <launchable type="desktop-id">io.github.TaylanTatli.iCloud-Linux.Contacts.desktop</launchable>
+  <launchable type="desktop-id">io.github.TaylanTatli.iCloud-Linux.Calendar.desktop</launchable>
+  <launchable type="desktop-id">io.github.TaylanTatli.iCloud-Linux.Photos.desktop</launchable>
+  <launchable type="desktop-id">io.github.TaylanTatli.iCloud-Linux.Drive.desktop</launchable>
+  <launchable type="desktop-id">io.github.TaylanTatli.iCloud-Linux.Notes.desktop</launchable>
+  <launchable type="desktop-id">io.github.TaylanTatli.iCloud-Linux.Reminders.desktop</launchable>
+  <launchable type="desktop-id">io.github.TaylanTatli.iCloud-Linux.Pages.desktop</launchable>
+  <launchable type="desktop-id">io.github.TaylanTatli.iCloud-Linux.Numbers.desktop</launchable>
+  <launchable type="desktop-id">io.github.TaylanTatli.iCloud-Linux.Keynote.desktop</launchable>
+  <launchable type="desktop-id">io.github.TaylanTatli.iCloud-Linux.Find.desktop</launchable>
+
+  <provides>
+    <binary>icloud-linux</binary>
+  </provides>
+
+  <categories>
+    <category>Network</category>
+    <category>Utility</category>
+  </categories>
+
+  <keywords>
+    <keyword>iCloud</keyword>
+    <keyword>Apple</keyword>
+    <keyword>Mail</keyword>
+    <keyword>Calendar</keyword>
+    <keyword>Photos</keyword>
+  </keywords>
+
+  <releases>
+    <release version="1.0.0" date="2026-06-05">
+      <description>
+        <p>Initial release.</p>
+      </description>
+    </release>
+  </releases>
+
+  <content_rating type="oars-1.1" />
+</component>

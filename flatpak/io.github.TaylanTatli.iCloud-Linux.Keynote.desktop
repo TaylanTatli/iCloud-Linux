@@ -1,0 +1,10 @@
+[Desktop Entry]
+Type=Application
+Name=iCloud Keynote
+Comment=Access iCloud Keynote on Linux
+Comment[tr]=Linux'ta iCloud Keynote'a erişin
+Exec=icloud-linux keynote Keynote
+Icon=io.github.TaylanTatli.iCloud-Linux.Keynote
+Categories=Network;Presentation;Office;
+Keywords=iCloud;Keynote;Apple;Presentation;
+StartupWMClass=iCloud Keynote

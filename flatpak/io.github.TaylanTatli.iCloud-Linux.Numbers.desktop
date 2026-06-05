@@ -1,0 +1,10 @@
+[Desktop Entry]
+Type=Application
+Name=iCloud Numbers
+Comment=Access iCloud Numbers on Linux
+Comment[tr]=Linux'ta iCloud Numbers'a erişin
+Exec=icloud-linux numbers Numbers
+Icon=io.github.TaylanTatli.iCloud-Linux.Numbers
+Categories=Network;Spreadsheet;Office;
+Keywords=iCloud;Numbers;Apple;Spreadsheet;
+StartupWMClass=iCloud Numbers

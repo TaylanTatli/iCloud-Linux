@@ -1,0 +1,10 @@
+[Desktop Entry]
+Type=Application
+Name=iCloud Drive
+Comment=Access iCloud Drive on Linux
+Comment[tr]=Linux'ta iCloud Drive'a erişin
+Exec=icloud-linux iclouddrive Drive
+Icon=io.github.TaylanTatli.iCloud-Linux.Drive
+Categories=Network;FileManager;
+Keywords=iCloud;Drive;Apple;Files;
+StartupWMClass=iCloud Drive

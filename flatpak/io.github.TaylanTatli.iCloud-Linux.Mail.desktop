@@ -1,0 +1,11 @@
+[Desktop Entry]
+Type=Application
+Name=iCloud Mail
+Name[tr]=iCloud Posta
+Comment=Access iCloud Mail on Linux
+Comment[tr]=Linux'ta iCloud Posta'ya erişin
+Exec=icloud-linux mail Mail
+Icon=io.github.TaylanTatli.iCloud-Linux.Mail
+Categories=Network;Email;
+Keywords=iCloud;Mail;Apple;Email;
+StartupWMClass=iCloud Mail

@@ -1,0 +1,11 @@
+[Desktop Entry]
+Type=Application
+Name=iCloud Calendar
+Name[tr]=iCloud Takvim
+Comment=Access iCloud Calendar on Linux
+Comment[tr]=Linux'ta iCloud Takvim'e erişin
+Exec=icloud-linux calendar Calendar
+Icon=io.github.TaylanTatli.iCloud-Linux.Calendar
+Categories=Network;Calendar;
+Keywords=iCloud;Calendar;Apple;
+StartupWMClass=iCloud Calendar

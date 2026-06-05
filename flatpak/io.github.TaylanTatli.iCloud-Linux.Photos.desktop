@@ -1,0 +1,11 @@
+[Desktop Entry]
+Type=Application
+Name=iCloud Photos
+Name[tr]=iCloud Fotoğraflar
+Comment=Access iCloud Photos on Linux
+Comment[tr]=Linux'ta iCloud Fotoğraflar'a erişin
+Exec=icloud-linux photos Photos
+Icon=io.github.TaylanTatli.iCloud-Linux.Photos
+Categories=Network;Photography;
+Keywords=iCloud;Photos;Apple;
+StartupWMClass=iCloud Photos

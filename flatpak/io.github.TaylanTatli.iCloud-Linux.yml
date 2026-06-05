@@ -1,0 +1,28 @@
+app-id: io.github.TaylanTatli.iCloud-Linux
+runtime: org.gnome.Platform
+runtime-version: "50"
+sdk: org.gnome.Sdk
+command: icloud-linux
+
+finish-args:
+  - --share=network
+  - --socket=wayland
+  - --socket=fallback-x11
+  - --share=ipc
+  - --device=dri
+  - --filesystem=xdg-data/icloud-linux:create
+  - --talk-name=org.freedesktop.Notifications
+
+modules:
+  - name: icloud-linux
+    buildsystem: cmake-ninja
+    config-opts:
+      - -DCMAKE_INSTALL_PREFIX=/app
+      - -DCMAKE_BUILD_TYPE=Release
+    sources:
+      - type: dir
+        path: ..
+    post-install:
+      - install -Dm644 flatpak/*.desktop -t /app/share/applications/
+      - install -Dm644 flatpak/io.github.TaylanTatli.iCloud-Linux.metainfo.xml /app/share/metainfo/io.github.TaylanTatli.iCloud-Linux.metainfo.xml
+      - install -Dm644 flatpak/*.svg -t /app/share/icons/hicolor/scalable/apps/

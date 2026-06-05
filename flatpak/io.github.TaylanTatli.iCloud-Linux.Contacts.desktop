@@ -1,0 +1,11 @@
+[Desktop Entry]
+Type=Application
+Name=iCloud Contacts
+Name[tr]=iCloud Kişiler
+Comment=Access iCloud Contacts on Linux
+Comment[tr]=Linux'ta iCloud Kişiler'e erişin
+Exec=icloud-linux contacts Contacts
+Icon=io.github.TaylanTatli.iCloud-Linux.Contacts
+Categories=Network;ContactManagement;
+Keywords=iCloud;Contacts;Apple;
+StartupWMClass=iCloud Contacts

@@ -1,0 +1,10 @@
+[Desktop Entry]
+Type=Application
+Name=iCloud Pages
+Comment=Access iCloud Pages on Linux
+Comment[tr]=Linux'ta iCloud Pages'e erişin
+Exec=icloud-linux pages Pages
+Icon=io.github.TaylanTatli.iCloud-Linux.Pages
+Categories=Network;WordProcessor;Office;
+Keywords=iCloud;Pages;Apple;Documents;
+StartupWMClass=iCloud Pages

@@ -1,0 +1,11 @@
+[Desktop Entry]
+Type=Application
+Name=iCloud Reminders
+Name[tr]=iCloud Hatırlatıcılar
+Comment=Access iCloud Reminders on Linux
+Comment[tr]=Linux'ta iCloud Hatırlatıcılar'a erişin
+Exec=icloud-linux reminders Reminders
+Icon=io.github.TaylanTatli.iCloud-Linux.Reminders
+Categories=Network;Utility;
+Keywords=iCloud;Reminders;Apple;Tasks;
+StartupWMClass=iCloud Reminders

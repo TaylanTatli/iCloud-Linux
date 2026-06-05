@@ -1,0 +1,11 @@
+[Desktop Entry]
+Type=Application
+Name=iCloud Find My
+Name[tr]=iCloud Bul
+Comment=Access iCloud Find My on Linux
+Comment[tr]=Linux'ta iCloud Bul'a erişin
+Exec=icloud-linux find Find
+Icon=io.github.TaylanTatli.iCloud-Linux.Find
+Categories=Network;Utility;
+Keywords=iCloud;Find;Apple;Location;
+StartupWMClass=iCloud Find
