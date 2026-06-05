@@ -39,6 +39,84 @@ static std::string read_tld()
     return tld;
 }
 
+struct WindowState
+{
+    std::string service;
+    int last_width;
+    int last_height;
+};
+
+static void load_window_geometry( const std::string& service, int& width, int& height, bool& maximized )
+{
+    width = 1280;
+    height = 800;
+    maximized = false;
+
+    auto get_path = [&]() -> std::filesystem::path
+    {
+        const char* xdg = getenv( "XDG_DATA_HOME" );
+        std::string base =
+            ( xdg && xdg[0] ) ? std::string( xdg ) : std::string( getenv( "HOME" ) ? getenv( "HOME" ) : "" ) + "/.local/share";
+        return std::filesystem::path( base ) / "icloud-linux" / ( "geometry_" + service );
+    };
+
+    auto path = get_path();
+    if ( std::filesystem::exists( path ) )
+    {
+        std::ifstream f( path );
+        int w, h, m;
+        if ( f >> w >> h >> m )
+        {
+            width = w;
+            height = h;
+            maximized = ( m != 0 );
+        }
+    }
+}
+
+static void save_window_geometry( const std::string& service, int width, int height, bool maximized )
+{
+    auto get_path = [&]() -> std::filesystem::path
+    {
+        const char* xdg = getenv( "XDG_DATA_HOME" );
+        std::string base =
+            ( xdg && xdg[0] ) ? std::string( xdg ) : std::string( getenv( "HOME" ) ? getenv( "HOME" ) : "" ) + "/.local/share";
+        return std::filesystem::path( base ) / "icloud-linux" / ( "geometry_" + service );
+    };
+
+    auto path = get_path();
+    std::filesystem::create_directories( path.parent_path() );
+    std::ofstream f( path );
+    if ( f.is_open() )
+    {
+        f << width << " " << height << " " << ( maximized ? 1 : 0 ) << "\n";
+    }
+}
+
+static void on_size_allocate( GtkWidget* widget, int width, int height, int /* baseline */, gpointer user_data )
+{
+    auto* ws = static_cast<WindowState*>( user_data );
+    if ( !gtk_window_is_maximized( GTK_WINDOW( widget ) ) )
+    {
+        ws->last_width = width;
+        ws->last_height = height;
+    }
+}
+
+static gboolean on_close_request( GtkWindow* window, gpointer user_data )
+{
+    auto* ws = static_cast<WindowState*>( user_data );
+    bool maximized = gtk_window_is_maximized( window );
+    save_window_geometry( ws->service, ws->last_width, ws->last_height, maximized );
+    return FALSE;
+}
+
+static void on_destroy( GtkWidget* /* object */, gpointer user_data )
+{
+    auto* ws = static_cast<WindowState*>( user_data );
+    delete ws;
+}
+
 // Store cookies in XDG_DATA_HOME/icloud-for-linux/cookies.sqlite
 static void setup_cookies( WebKitWebView* webview )
 {
@@ -76,9 +154,20 @@ static GtkWidget* on_create( WebKitWebView* source_view, WebKitNavigationAction*
     gtk_widget_set_hexpand( GTK_WIDGET( new_view ), TRUE );
     gtk_widget_set_vexpand( GTK_WIDGET( new_view ), TRUE );
 
+    std::string key = data->service + "_popup";
+    int width, height;
+    bool maximized;
+    load_window_geometry( key, width, height, maximized );
+
+    auto* ws = new WindowState{ key, width, height };
+
     GtkWidget* win = adw_window_new();
     gtk_window_set_title( GTK_WINDOW( win ), ( "iCloud " + data->title + " ⧉" ).c_str() );
-    gtk_window_set_default_size( GTK_WINDOW( win ), 1000, 600 );
+    gtk_window_set_default_size( GTK_WINDOW( win ), width, height );
+    if ( maximized )
+    {
+        gtk_window_maximize( GTK_WINDOW( win ) );
+    }
 
     GtkWidget* box = gtk_box_new( GTK_ORIENTATION_VERTICAL, 0 );
     GtkWidget* header = adw_header_bar_new();
@@ -86,6 +175,11 @@ static GtkWidget* on_create( WebKitWebView* source_view, WebKitNavigationAction*
     gtk_box_append( GTK_BOX( box ), GTK_WIDGET( new_view ) );
 
     adw_window_set_content( ADW_WINDOW( win ), box );
+
+    g_signal_connect( win, "size-allocate", G_CALLBACK( on_size_allocate ), ws );
+    g_signal_connect( win, "close-request", G_CALLBACK( on_close_request ), ws );
+    g_signal_connect( win, "destroy", G_CALLBACK( on_destroy ), ws );
+
     gtk_window_present( GTK_WINDOW( win ) );
 
     return GTK_WIDGET( new_view );
@@ -105,9 +199,19 @@ static void on_activate( GtkApplication* app, gpointer user_data )
     gtk_widget_set_hexpand( GTK_WIDGET( webview ), TRUE );
     gtk_widget_set_vexpand( GTK_WIDGET( webview ), TRUE );
 
+    int width, height;
+    bool maximized;
+    load_window_geometry( data->service, width, height, maximized );
+
+    auto* ws = new WindowState{ data->service, width, height };
+
     GtkWidget* win = adw_application_window_new( app );
     gtk_window_set_title( GTK_WINDOW( win ), ( "iCloud " + data->title ).c_str() );
-    gtk_window_set_default_size( GTK_WINDOW( win ), 1000, 600 );
+    gtk_window_set_default_size( GTK_WINDOW( win ), width, height );
+    if ( maximized )
+    {
+        gtk_window_maximize( GTK_WINDOW( win ) );
+    }
 
     GtkWidget* box = gtk_box_new( GTK_ORIENTATION_VERTICAL, 0 );
     GtkWidget* header = adw_header_bar_new();
@@ -115,6 +219,11 @@ static void on_activate( GtkApplication* app, gpointer user_data )
     gtk_box_append( GTK_BOX( box ), GTK_WIDGET( webview ) );
 
     adw_application_window_set_content( ADW_APPLICATION_WINDOW( win ), box );
+
+    g_signal_connect( win, "size-allocate", G_CALLBACK( on_size_allocate ), ws );
+    g_signal_connect( win, "close-request", G_CALLBACK( on_close_request ), ws );
+    g_signal_connect( win, "destroy", G_CALLBACK( on_destroy ), ws );
+
     gtk_window_present( GTK_WINDOW( win ) );
 }
 
