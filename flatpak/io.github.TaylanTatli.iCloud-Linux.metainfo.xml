@@ -40,6 +40,13 @@
   <url type="bugtracker">https://github.com/TaylanTatli/iCloud-Linux/issues</url>
   <url type="vcs-browser">https://github.com/TaylanTatli/iCloud-Linux</url>
 
+  <screenshots>
+    <screenshot type="default">
+      <caption>iCloud Linux</caption>
+      <image>https://github.com/user-attachments/assets/b3eee950-edbc-4a4f-a8d8-c616e26a661d</image>
+    </screenshot>
+  </screenshots>
+
   <launchable type="desktop-id">io.github.TaylanTatli.iCloud-Linux.Mail.desktop</launchable>
   <launchable type="desktop-id">io.github.TaylanTatli.iCloud-Linux.Contacts.desktop</launchable>
   <launchable type="desktop-id">io.github.TaylanTatli.iCloud-Linux.Calendar.desktop</launchable>
