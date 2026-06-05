@@ -39,12 +39,7 @@ static std::string read_tld()
     return tld;
 }
 
-struct WindowState
-{
-    std::string service;
-    int last_width;
-    int last_height;
-};
+
 
 static void load_window_geometry( const std::string& service, int& width, int& height, bool& maximized )
 {
@@ -93,13 +88,31 @@ static void save_window_geometry( const std::string& service, int width, int hei
     }
 }
 
-static void on_size_allocate( GtkWidget* widget, int width, int height, int /* baseline */, gpointer user_data )
+struct WindowState
+{
+    std::string service;
+    int last_width;
+    int last_height;
+    GtkWidget* window;
+};
+
+static void window_size_changed_cb( GObject* /* object */, GParamSpec* /* pspec */, gpointer user_data )
 {
     auto* ws = static_cast<WindowState*>( user_data );
-    if ( !gtk_window_is_maximized( GTK_WINDOW( widget ) ) )
+    if ( ws->window && !gtk_window_is_maximized( GTK_WINDOW( ws->window ) ) )
     {
-        ws->last_width = width;
-        ws->last_height = height;
+        ws->last_width = gtk_widget_get_width( ws->window );
+        ws->last_height = gtk_widget_get_height( ws->window );
+    }
+}
+
+static void window_mapped_cb( GtkWidget* widget, gpointer user_data )
+{
+    GdkSurface* surface = gtk_native_get_surface( GTK_NATIVE( widget ) );
+    if ( surface )
+    {
+        g_signal_connect( surface, "notify::width", G_CALLBACK( window_size_changed_cb ), user_data );
+        g_signal_connect( surface, "notify::height", G_CALLBACK( window_size_changed_cb ), user_data );
     }
 }
 
@@ -159,9 +172,10 @@ static GtkWidget* on_create( WebKitWebView* source_view, WebKitNavigationAction*
     bool maximized;
     load_window_geometry( key, width, height, maximized );
 
-    auto* ws = new WindowState{ key, width, height };
+    auto* ws = new WindowState{ key, width, height, nullptr };
 
     GtkWidget* win = adw_window_new();
+    ws->window = win;
     gtk_window_set_title( GTK_WINDOW( win ), ( "iCloud " + data->title + " ⧉" ).c_str() );
     gtk_window_set_default_size( GTK_WINDOW( win ), width, height );
     if ( maximized )
@@ -176,7 +190,7 @@ static GtkWidget* on_create( WebKitWebView* source_view, WebKitNavigationAction*
 
     adw_window_set_content( ADW_WINDOW( win ), box );
 
-    g_signal_connect( win, "size-allocate", G_CALLBACK( on_size_allocate ), ws );
+    g_signal_connect( win, "map", G_CALLBACK( window_mapped_cb ), ws );
     g_signal_connect( win, "close-request", G_CALLBACK( on_close_request ), ws );
     g_signal_connect( win, "destroy", G_CALLBACK( on_destroy ), ws );
 
@@ -203,9 +217,10 @@ static void on_activate( GtkApplication* app, gpointer user_data )
     bool maximized;
     load_window_geometry( data->service, width, height, maximized );
 
-    auto* ws = new WindowState{ data->service, width, height };
+    auto* ws = new WindowState{ data->service, width, height, nullptr };
 
     GtkWidget* win = adw_application_window_new( app );
+    ws->window = win;
     gtk_window_set_title( GTK_WINDOW( win ), ( "iCloud " + data->title ).c_str() );
     gtk_window_set_default_size( GTK_WINDOW( win ), width, height );
     if ( maximized )
@@ -220,7 +235,7 @@ static void on_activate( GtkApplication* app, gpointer user_data )
 
     adw_application_window_set_content( ADW_APPLICATION_WINDOW( win ), box );
 
-    g_signal_connect( win, "size-allocate", G_CALLBACK( on_size_allocate ), ws );
+    g_signal_connect( win, "map", G_CALLBACK( window_mapped_cb ), ws );
     g_signal_connect( win, "close-request", G_CALLBACK( on_close_request ), ws );
     g_signal_connect( win, "destroy", G_CALLBACK( on_destroy ), ws );
 
