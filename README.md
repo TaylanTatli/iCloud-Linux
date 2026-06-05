@@ -1,4 +1,4 @@
-# iCloud Linux
+# <img src="https://raw.githubusercontent.com/TaylanTatli/iCloud-Linux/master/flatpak/io.github.TaylanTatli.iCloud-Linux.svg" alt="iCloud Linux Logo" width="26" height="26"> iCloud Linux
 
 [![GPL-3.0 License](https://img.shields.io/badge/License-GPL%203.0-blue.svg)](LICENSE)
 [![Flatpak](https://img.shields.io/badge/Flatpak-Flathub-green.svg)](https://flatpak.org)
@@ -7,7 +7,8 @@ iCloud Linux provides lightweight, native-feeling desktop access to Apple iCloud
 
 This project is a modernized fork of [cross-platform/icloud-for-linux](https://github.com/cross-platform/icloud-for-linux), completely rewritten in C++ utilizing GTK4 and Libadwaita to provide native Flatpak packaging.
 
-![iCloud Linux App Store View](https://raw.githubusercontent.com/TaylanTatli/iCloud-Linux/master/flatpak/io.github.TaylanTatli.iCloud-Linux.svg)
+
+<img width="1810" height="1043" alt="preview" src="https://github.com/user-attachments/assets/b3eee950-edbc-4a4f-a8d8-c616e26a661d" />
 
 ---
 
