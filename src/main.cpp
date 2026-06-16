@@ -256,7 +256,8 @@ int main( int argc, char** argv )
     data.title = argv[2];
     data.tld = read_tld();
 
-    AdwApplication* app = adw_application_new( "io.github.TaylanTatli.iCloud-Linux", G_APPLICATION_DEFAULT_FLAGS );
+    std::string app_id = "io.github.TaylanTatli.iCloud-Linux." + data.title;
+    AdwApplication* app = adw_application_new( app_id.c_str(), G_APPLICATION_DEFAULT_FLAGS );
 
     g_signal_connect( app, "activate", G_CALLBACK( on_activate ), &data );
 
