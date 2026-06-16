@@ -77,14 +77,19 @@
   </keywords>
 
   <releases>
+    <release version="1.1.2" date="2026-06-17">
+      <description>
+        <p>Set dynamic GApplication ID matching desktop file names to restore taskbar icons.</p>
+      </description>
+    </release>
     <release version="1.1.1" date="2026-06-06">
       <description>
-        <p>Release of iCloud for Linux v1.1.1.</p>
+        <p>Fix window geometry.</p>
       </description>
     </release>
     <release version="1.1.0" date="2026-06-06">
       <description>
-        <p>Release of iCloud for Linux v1.1.0.</p>
+        <p>Window geometry persistence for windows</p>
       </description>
     </release>
     <release version="1.0.0" date="2026-06-05">
