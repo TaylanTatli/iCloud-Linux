@@ -130,21 +130,17 @@ static void download_decide_destination_cb( WebKitDownload* download, const gcha
         download_dir = g_get_tmp_dir();
     }
 
-    // Append "(1)" or similar if the file exists could be nice, but WebKitGTK handles 
-    // naming automatically or fails depending on overwrite flag.
     gchar* destination = g_build_filename( download_dir, suggested_filename, NULL );
-    gchar* uri = g_filename_to_uri( destination, NULL, NULL );
-
-    webkit_download_set_destination( download, uri );
-
+    webkit_download_set_destination( download, destination );
     g_free( destination );
-    g_free( uri );
 }
 
 static void download_started_cb( WebKitNetworkSession* /* session */, WebKitDownload* download, gpointer /* user_data */ )
 {
     g_signal_connect( download, "decide-destination", G_CALLBACK( download_decide_destination_cb ), nullptr );
 }
+
+
 
 // Store cookies in XDG_DATA_HOME/icloud-linux/cookies.sqlite
 static void setup_network_session( WebKitWebView* webview )
