@@ -130,11 +130,37 @@ static void on_destroy( GtkWidget* /* object */, gpointer user_data )
     delete ws;
 }
 
+static void download_decide_destination_cb( WebKitDownload* download, const gchar* suggested_filename, gpointer /* user_data */ )
+{
+    const gchar* download_dir = g_get_user_special_dir( G_USER_DIRECTORY_DOWNLOAD );
+    if ( !download_dir )
+    {
+        download_dir = g_get_tmp_dir();
+    }
+
+    // Append "(1)" or similar if the file exists could be nice, but WebKitGTK handles 
+    // naming automatically or fails depending on overwrite flag.
+    gchar* destination = g_build_filename( download_dir, suggested_filename, NULL );
+    gchar* uri = g_filename_to_uri( destination, NULL, NULL );
+
+    webkit_download_set_destination( download, uri );
+
+    g_free( destination );
+    g_free( uri );
+}
+
+static void download_started_cb( WebKitNetworkSession* /* session */, WebKitDownload* download, gpointer /* user_data */ )
+{
+    g_signal_connect( download, "decide-destination", G_CALLBACK( download_decide_destination_cb ), nullptr );
+}
+
 // Store cookies in XDG_DATA_HOME/icloud-for-linux/cookies.sqlite
-static void setup_cookies( WebKitWebView* webview )
+static void setup_network_session( WebKitWebView* webview )
 {
     WebKitNetworkSession* session = webkit_web_view_get_network_session( webview );
     WebKitCookieManager* cookie_manager = webkit_network_session_get_cookie_manager( session );
+
+    g_signal_connect( session, "download-started", G_CALLBACK( download_started_cb ), nullptr );
 
     const char* xdg = getenv( "XDG_DATA_HOME" );
     std::string base =
@@ -204,7 +230,7 @@ static void on_activate( GtkApplication* app, gpointer user_data )
     auto* data = static_cast<AppData*>( user_data );
 
     WebKitWebView* webview = make_webview();
-    setup_cookies( webview );
+    setup_network_session( webview );
     g_signal_connect( webview, "create", G_CALLBACK( on_create ), data );
 
     std::string url = "https://www.icloud" + data->tld + "/" + data->service;
