@@ -152,6 +152,7 @@ static void download_conflict_response_cb( AdwAlertDialog* dlg, const char* resp
     }
     else
     {
+        g_object_set_data( G_OBJECT( dl ), "cancelled", GINT_TO_POINTER( 1 ) );
         webkit_download_cancel( dl );
     }
     g_object_unref( dl );
@@ -222,6 +223,8 @@ static void show_toast( WebKitDownload* download, const char* message )
 
 static void download_finished_cb( WebKitDownload* download, gpointer /* user_data */ )
 {
+    if ( g_object_get_data( G_OBJECT( download ), "cancelled" ) )
+        return;
     show_toast( download, "File download completed." );
 }
 

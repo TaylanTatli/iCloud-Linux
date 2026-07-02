@@ -77,6 +77,11 @@
   </keywords>
 
   <releases>
+    <release version="1.1.5" date="2026-07-02">
+      <description>
+        <p>Fix download completed notification incorrectly appearing after a cancelled download.</p>
+      </description>
+    </release>
     <release version="1.1.4" date="2026-07-02">
       <description>
         <p>Show download started and completed toast notifications.</p>
