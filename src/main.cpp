@@ -93,8 +93,13 @@ static void window_size_changed_cb( GObject* /* object */, GParamSpec* /* pspec 
     auto* ws = static_cast<WindowState*>( user_data );
     if ( ws->window && !gtk_window_is_maximized( GTK_WINDOW( ws->window ) ) )
     {
-        ws->last_width = gtk_widget_get_width( ws->window );
-        ws->last_height = gtk_widget_get_height( ws->window );
+        int w = gtk_widget_get_width( ws->window );
+        int h = gtk_widget_get_height( ws->window );
+        if ( w > 0 && h > 0 )
+        {
+            ws->last_width = w;
+            ws->last_height = h;
+        }
     }
 }
 
