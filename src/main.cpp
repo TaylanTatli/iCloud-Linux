@@ -17,20 +17,28 @@ struct AppData
     std::string tld;      // ".com", ".com.cn", ...
 };
 
-// Read TLD: Flatpak → XDG_DATA_HOME/icloud-for-linux/tld
+static std::string get_data_dir()
+{
+    const char* xdg = getenv( "XDG_DATA_HOME" );
+    std::string base;
+    if ( xdg && xdg[0] )
+    {
+        base = xdg;
+    }
+    else
+    {
+        const char* home = getenv( "HOME" );
+        base = home ? home : "";
+        base += "/.local/share";
+    }
+    return base + "/icloud-linux";
+}
+
+// Read TLD: Flatpak → XDG_DATA_HOME/icloud-linux/tld
 static std::string read_tld()
 {
     std::string tld = ".com";
-
-    auto get_path = []() -> std::filesystem::path
-    {
-        const char* xdg = getenv( "XDG_DATA_HOME" );
-        std::string base =
-            ( xdg && xdg[0] ) ? std::string( xdg ) : std::string( getenv( "HOME" ) ? getenv( "HOME" ) : "" ) + "/.local/share";
-        return std::filesystem::path( base ) / "icloud-linux" / "tld";
-    };
-
-    auto path = get_path();
+    std::string path = get_data_dir() + "/tld";
     if ( std::filesystem::exists( path ) )
     {
         std::ifstream f( path );
@@ -47,15 +55,7 @@ static void load_window_geometry( const std::string& service, int& width, int& h
     height = 800;
     maximized = false;
 
-    auto get_path = [&]() -> std::filesystem::path
-    {
-        const char* xdg = getenv( "XDG_DATA_HOME" );
-        std::string base =
-            ( xdg && xdg[0] ) ? std::string( xdg ) : std::string( getenv( "HOME" ) ? getenv( "HOME" ) : "" ) + "/.local/share";
-        return std::filesystem::path( base ) / "icloud-linux" / ( "geometry_" + service );
-    };
-
-    auto path = get_path();
+    std::string path = get_data_dir() + "/geometry_" + service;
     if ( std::filesystem::exists( path ) )
     {
         std::ifstream f( path );
@@ -71,15 +71,7 @@ static void load_window_geometry( const std::string& service, int& width, int& h
 
 static void save_window_geometry( const std::string& service, int width, int height, bool maximized )
 {
-    auto get_path = [&]() -> std::filesystem::path
-    {
-        const char* xdg = getenv( "XDG_DATA_HOME" );
-        std::string base =
-            ( xdg && xdg[0] ) ? std::string( xdg ) : std::string( getenv( "HOME" ) ? getenv( "HOME" ) : "" ) + "/.local/share";
-        return std::filesystem::path( base ) / "icloud-linux" / ( "geometry_" + service );
-    };
-
-    auto path = get_path();
+    std::filesystem::path path = get_data_dir() + "/geometry_" + service;
     std::filesystem::create_directories( path.parent_path() );
     std::ofstream f( path );
     if ( f.is_open() )
@@ -154,7 +146,7 @@ static void download_started_cb( WebKitNetworkSession* /* session */, WebKitDown
     g_signal_connect( download, "decide-destination", G_CALLBACK( download_decide_destination_cb ), nullptr );
 }
 
-// Store cookies in XDG_DATA_HOME/icloud-for-linux/cookies.sqlite
+// Store cookies in XDG_DATA_HOME/icloud-linux/cookies.sqlite
 static void setup_network_session( WebKitWebView* webview )
 {
     WebKitNetworkSession* session = webkit_web_view_get_network_session( webview );
@@ -162,14 +154,11 @@ static void setup_network_session( WebKitWebView* webview )
 
     g_signal_connect( session, "download-started", G_CALLBACK( download_started_cb ), nullptr );
 
-    const char* xdg = getenv( "XDG_DATA_HOME" );
-    std::string base =
-        ( xdg && xdg[0] ) ? std::string( xdg ) : std::string( getenv( "HOME" ) ? getenv( "HOME" ) : "" ) + "/.local/share";
-
-    auto dir = std::filesystem::path( base ) / "icloud-linux";
+    std::string dir = get_data_dir();
     std::filesystem::create_directories( dir );
 
-    webkit_cookie_manager_set_persistent_storage( cookie_manager, ( dir / "cookies.sqlite" ).c_str(),
+    std::string cookie_path = dir + "/cookies.sqlite";
+    webkit_cookie_manager_set_persistent_storage( cookie_manager, cookie_path.c_str(),
                                                   WEBKIT_COOKIE_PERSISTENT_STORAGE_SQLITE );
 }
 
