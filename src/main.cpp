@@ -122,7 +122,42 @@ static void on_destroy( GtkWidget* /* object */, gpointer user_data )
     delete ws;
 }
 
-static void download_decide_destination_cb( WebKitDownload* download, const gchar* suggested_filename, gpointer /* user_data */ )
+static void download_conflict_response_cb( AdwAlertDialog* dlg, const char* response, gpointer /* user_data */ )
+{
+    WebKitDownload* dl = WEBKIT_DOWNLOAD( g_object_get_data( G_OBJECT( dlg ), "download" ) );
+    const char* dest = (const char*)g_object_get_data( G_OBJECT( dlg ), "destination" );
+    const char* suggested = (const char*)g_object_get_data( G_OBJECT( dlg ), "suggested_filename" );
+
+    if ( g_strcmp0( response, "overwrite" ) == 0 )
+    {
+        webkit_download_set_allow_overwrite( dl, TRUE );
+        webkit_download_set_destination( dl, dest );
+    }
+    else if ( g_strcmp0( response, "rename" ) == 0 )
+    {
+        std::filesystem::path file_path( suggested );
+        std::string stem = file_path.stem().string();
+        std::string ext = file_path.extension().string();
+        std::string dir = std::filesystem::path( dest ).parent_path().string();
+        
+        std::string new_dest = dest;
+        int counter = 1;
+        while ( std::filesystem::exists( new_dest ) )
+        {
+            std::string new_name = stem + " (" + std::to_string( counter ) + ")" + ext;
+            new_dest = dir + "/" + new_name;
+            counter++;
+        }
+        webkit_download_set_destination( dl, new_dest.c_str() );
+    }
+    else
+    {
+        webkit_download_cancel( dl );
+    }
+    g_object_unref( dl );
+}
+
+static gboolean download_decide_destination_cb( WebKitDownload* download, const gchar* suggested_filename, gpointer /* user_data */ )
 {
     const gchar* download_dir = g_get_user_special_dir( G_USER_DIRECTORY_DOWNLOAD );
     if ( !download_dir )
@@ -131,13 +166,78 @@ static void download_decide_destination_cb( WebKitDownload* download, const gcha
     }
 
     gchar* destination = g_build_filename( download_dir, suggested_filename, NULL );
+
+    if ( g_file_test( destination, G_FILE_TEST_EXISTS ) )
+    {
+        WebKitWebView* wv = webkit_download_get_web_view( download );
+        GtkWindow* parent_win = nullptr;
+        if ( wv )
+        {
+            GtkWidget* toplevel = gtk_widget_get_ancestor( GTK_WIDGET( wv ), GTK_TYPE_WINDOW );
+            if ( toplevel ) parent_win = GTK_WINDOW( toplevel );
+        }
+
+        AdwDialog* dialog = ADW_DIALOG( adw_alert_dialog_new( "File Already Exists", "A file with this name already exists. What would you like to do?" ) );
+        adw_alert_dialog_add_response( ADW_ALERT_DIALOG( dialog ), "cancel", "Cancel" );
+        adw_alert_dialog_add_response( ADW_ALERT_DIALOG( dialog ), "rename", "Create Copy" );
+        adw_alert_dialog_add_response( ADW_ALERT_DIALOG( dialog ), "overwrite", "Overwrite" );
+        
+        adw_alert_dialog_set_response_appearance( ADW_ALERT_DIALOG( dialog ), "overwrite", ADW_RESPONSE_DESTRUCTIVE );
+        adw_alert_dialog_set_default_response( ADW_ALERT_DIALOG( dialog ), "rename" );
+        adw_alert_dialog_set_close_response( ADW_ALERT_DIALOG( dialog ), "cancel" );
+
+        g_object_set_data_full( G_OBJECT( dialog ), "destination", g_strdup( destination ), g_free );
+        g_object_set_data_full( G_OBJECT( dialog ), "suggested_filename", g_strdup( suggested_filename ), g_free );
+        g_object_set_data( G_OBJECT( dialog ), "download", download );
+        g_object_ref( download ); 
+
+        g_signal_connect( dialog, "response", G_CALLBACK( download_conflict_response_cb ), nullptr );
+
+        if ( parent_win )
+            adw_dialog_present( ADW_DIALOG( dialog ), GTK_WIDGET( parent_win ) );
+        else
+            g_warning("Could not present dialog: parent_win is null");
+
+        g_free( destination );
+        return TRUE;
+    }
+
     webkit_download_set_destination( download, destination );
     g_free( destination );
+    return TRUE;
+}
+
+static void show_toast( WebKitDownload* download, const char* message )
+{
+    WebKitWebView* wv = webkit_download_get_web_view( download );
+    if ( !wv ) return;
+    
+    GtkWidget* overlay = GTK_WIDGET( g_object_get_data( G_OBJECT( wv ), "toast-overlay" ) );
+    if ( !overlay ) return;
+
+    AdwToast* toast = adw_toast_new( message );
+    adw_toast_set_timeout( toast, 3 );
+    adw_toast_overlay_add_toast( ADW_TOAST_OVERLAY( overlay ), toast );
+}
+
+static void download_finished_cb( WebKitDownload* download, gpointer /* user_data */ )
+{
+    show_toast( download, "File download completed." );
+}
+
+static void download_failed_cb( WebKitDownload* download, GError* error, gpointer /* user_data */ )
+{
+    std::string msg = "Download failed: ";
+    msg += ( error ? error->message : "Unknown error" );
+    show_toast( download, msg.c_str() );
 }
 
 static void download_started_cb( WebKitNetworkSession* /* session */, WebKitDownload* download, gpointer /* user_data */ )
 {
+    show_toast( download, "File download started." );
     g_signal_connect( download, "decide-destination", G_CALLBACK( download_decide_destination_cb ), nullptr );
+    g_signal_connect( download, "finished", G_CALLBACK( download_finished_cb ), nullptr );
+    g_signal_connect( download, "failed", G_CALLBACK( download_failed_cb ), nullptr );
 }
 
 
@@ -199,7 +299,11 @@ static GtkWidget* on_create( WebKitWebView* source_view, WebKitNavigationAction*
     gtk_box_append( GTK_BOX( box ), header );
     gtk_box_append( GTK_BOX( box ), GTK_WIDGET( new_view ) );
 
-    adw_window_set_content( ADW_WINDOW( win ), box );
+    GtkWidget* toast_overlay = adw_toast_overlay_new();
+    adw_toast_overlay_set_child( ADW_TOAST_OVERLAY( toast_overlay ), box );
+    g_object_set_data( G_OBJECT( new_view ), "toast-overlay", toast_overlay );
+
+    adw_window_set_content( ADW_WINDOW( win ), toast_overlay );
 
     g_signal_connect( win, "map", G_CALLBACK( window_mapped_cb ), ws );
     g_signal_connect( win, "close-request", G_CALLBACK( on_close_request ), ws );
@@ -244,7 +348,11 @@ static void on_activate( GtkApplication* app, gpointer user_data )
     gtk_box_append( GTK_BOX( box ), header );
     gtk_box_append( GTK_BOX( box ), GTK_WIDGET( webview ) );
 
-    adw_application_window_set_content( ADW_APPLICATION_WINDOW( win ), box );
+    GtkWidget* toast_overlay = adw_toast_overlay_new();
+    adw_toast_overlay_set_child( ADW_TOAST_OVERLAY( toast_overlay ), box );
+    g_object_set_data( G_OBJECT( webview ), "toast-overlay", toast_overlay );
+
+    adw_application_window_set_content( ADW_APPLICATION_WINDOW( win ), toast_overlay );
 
     g_signal_connect( win, "map", G_CALLBACK( window_mapped_cb ), ws );
     g_signal_connect( win, "close-request", G_CALLBACK( on_close_request ), ws );
